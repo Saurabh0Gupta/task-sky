@@ -1,0 +1,145 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #333;
+            padding: 10px;
+            color: white;
+        }
+        .navbar a {
+            color: white;
+            padding: 14px 20px;
+            text-decoration: none;
+            text-align: center;
+        }
+        .navbar a:hover {
+            background-color: #ddd;
+            color: black;
+        }
+        .form-container {
+            padding: 20px;
+        }
+        .form-container label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        .form-container select, .form-container input, .form-container textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+        }
+        .form-container input[type="submit"] {
+            width: auto;
+            background-color: #333;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .form-container input[type="submit"]:hover {
+            background-color: #555;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const categoryDropdown = document.getElementById('categoryDropdown');
+            const subcategoryDropdown = document.getElementById('subcategoryDropdown');
+
+            // Fetch and populate categories
+            function populateCategories() {
+                fetch('/getCategories')
+                    .then(response => response.json())
+                    .then(data => {
+                        data.categories.forEach(cate => {
+                            const option = document.createElement('option');
+                            option.value = cate._id;
+                            option.textContent = cate.categoryName;
+                            categoryDropdown.appendChild(option);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error fetching categories:', error);
+                    });
+            }
+
+            // Fetch and populate subcategories based on selected category
+            categoryDropdown.addEventListener('change', function() {
+                const categoryId = this.value;
+                if (categoryId) {
+                    fetch(`/getSubcategories/${categoryId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            subcategoryDropdown.innerHTML = '<option value="" disabled selected>Select subcategory</option>';
+                            data.subcategories.forEach(sub => {
+                                const option = document.createElement('option');
+                                option.value = sub._id;
+                                option.textContent = sub.subCategoryName;
+                                subcategoryDropdown.appendChild(option);
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error fetching subcategories:', error);
+                        });
+                }
+            });
+
+            // Populate categories on page load
+            populateCategories();
+        });
+    </script>
+</head>
+<body>
+    <div class="navbar">
+        <a href="#">Logo</a>
+        <div class="menu">
+            <a href="/showCategory">Add Category</a>
+            <a href="/allproduct">All Product</a>
+            <a href="/show">Add product</a>
+        </div>
+    </div>
+
+    <div class="form-container">
+        <h2>Add Product</h2>
+        <form action="/submitProduct" method="POST">
+            <label for="categoryDropdown">Category:</label>
+            <select id="categoryDropdown" name="category">
+                <option value="" disabled selected>Select category</option>
+            </select>
+
+            <label for="subcategoryDropdown">Subcategory:</label>
+            <select id="subcategoryDropdown" name="subcategory">
+                <option value="" disabled selected>Select subcategory</option>
+            </select>
+
+            <label for="productName">Name of Product:</label>
+            <input type="text" id="productName" name="productName" required>
+
+            <label for="mrp">MRP:</label>
+            <input type="number" id="mrp" name="mrp" required>
+
+            <label for="price">Price:</label>
+            <input type="number" id="price" name="price" required>
+
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" rows="4" required></textarea>
+
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+</body>
+</html>
+
